@@ -13,15 +13,6 @@
     line-height: 42px;
 }
 
-#popupPanel {
-    width: 26%;
-    padding: 20px;
-    display: inline-block;
-    vertical-align: bottom;
-    text-align: center;
-    line-height: 42px;
-}
-
 .range-slider {
     width:50%;
 }
