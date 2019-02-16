@@ -28,7 +28,7 @@ function updatePropSymbols(map,attribute){
             var year = attribute.split("_")[1];
             var popupContent = "<p><b>Stadium:</b> " +props.Stadium + "</p>";
             popupContent += "<p><b>Team:</b> " +props.Team + "</p>";
-			var panelContent = "<p><b>Population in " + year + ":</b> "+ props[attribute] + "</p>";
+			var panelContent = "<p><b>Attendance in " + year + ":</b> "+ props[attribute] + "</p>";
             layer.bindPopup(popupContent,{
                 offest: new L.point(0,-color)
             });
@@ -121,7 +121,7 @@ function onEachFeature(feature, layer){
     var year = attribute.split("_")[1];
     popupContent ="<p><b>Stadium:</b> "+ feature.properties.Stadium + "</p>";
     popupContent += "<p><b>Team:</b> "+feature.properties.Team + "</p>";
-    popupContent += "<p><b>Population in " + year + ":</b> "+feature.properties[attribute] + "</p>";
+    popupContent += "<p><b>Attendance in " + year + ":</b> "+feature.properties[attribute] + "</p>";
     layer.bindPopup(popupContent);
     };
 
