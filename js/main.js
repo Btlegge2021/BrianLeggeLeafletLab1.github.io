@@ -6,25 +6,27 @@ function createMap(){
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
 
-    //call getData function
+    //call ajax function
     getData(map);
 };
 
+//update points when slider is pressed
 function updatePropSymbols(map,attribute){
+    //Update points 
     map.eachLayer(function(layer){
         if(layer.feature && layer.feature.properties[attribute]){
             var props = layer.feature.properties;
             var color = getColor(props[attribute]);
-			var options = {
+	    var options = {
                 radius: 8,
                 color: "#000",
                 weight: 1,
                 opacity: 1, 
                 fillOpacity: 0.8,
-				fillColor: color
-                };
+		fillColor: color
+                	};
             layer.setStyle(options);
-			
+	    //Refresh pop ups
             var year = attribute.split("_")[1];
             var popupContent = "<p><b>Stadium:</b> " +props.Stadium + "</p>";
             popupContent += "<p><b>Team:</b> " +props.Team + "</p>";
@@ -48,8 +50,9 @@ function updatePropSymbols(map,attribute){
         };
     });
 };
-
+//Create slider and buttons
 function createSquenceControls(map, attributes){
+    //Create Slider
     $("#panel").append('<input class="range-slider" type="range">');
     $('.range-slider').attr({
         max: 7,
@@ -57,23 +60,29 @@ function createSquenceControls(map, attributes){
         value: 0,
         step: 1
     });
+    //Create forward and reverse buttons
     $('#reverse').append('<button class="skip" id="reverse">Reverse</button>');
     $('#forward').append('<button class="skip" id="forward">Forward</button>');
     
+    //Get value from slider
     $('.skip').click(function(){
         var index = $('.range-slider').val();
-        
+        //Increase value on forward button press
         if ($(this).attr('id') == 'forward'){
             index++;
+	    //If value goes above 7 then it resets to 0
             index = index > 7 ? 0: index;
+	  //Decrease value on reverse press
         } else if ($(this).attr('id') == 'reverse'){
             index--;
+	    //If value goes below 0 then it goes to 7
             index = index < 0 ? 7: index;
         };
+	 //Use value from buttons to run updatePropSymbols.
         $('.range-slider').val(index);
 		updatePropSymbols(map, attributes[index]);
     });
-    
+    //Use value selected from slider to run updatePropSymbosl
     $('.range-slider').on('input',function(){
         var index = $(this).val();
         updatePropSymbols(map, attributes[index]);
@@ -95,7 +104,7 @@ function processData(data){
     
     return attributes;
 }
-
+//Create ranges of colors based on Attendance value
 function getColor(d) {
     return d > 3250000 ? '#800026' :
     d > 3000000  ? '#BD0026' :
@@ -107,49 +116,41 @@ function getColor(d) {
     '#FFEDA0';
 	};
 
-function onEachFeature(feature, layer){
-    
-    var popupContent = "";
-    /*if(feature.properties){
-        
-        for(var property in feature.properties){
-            popupContent += "<p>" + property; //+ ": " + feature.properties[property] + "</p>";
-        }
-        layer.bindPopup(popupContent);
-    }*/
-    var attribute = "Attend_2018"
-    var year = attribute.split("_")[1];
-    popupContent ="<p><b>Stadium:</b> "+ feature.properties.Stadium + "</p>";
-    popupContent += "<p><b>Team:</b> "+feature.properties.Team + "</p>";
-    popupContent += "<p><b>Attendance in " + year + ":</b> "+feature.properties[attribute] + "</p>";
-    layer.bindPopup(popupContent);
-    };
-
+//Create points to layer attributes and functions for geoJson Layer
 function pointToLayer(feature, latlng, attributes){
-    
+	
+    //Attributes intialized at 0 postions in array.
     var attribute = attributes[0];
     console.log(attribute);
-    
-  var geojsonMarkerOptions = {
+	
+    //Create options for points layer
+    var geojsonMarkerOptions = {
                 radius: 8,
                 color: "#000",
                 weight: 1,
                 opacity: 1, 
                 fillOpacity: 0.8
                 };
+    //Get number value of Attributes property	
     var attValue = Number(feature.properties[attribute]);
     
+    //Create point color based on Attribute value
     geojsonMarkerOptions.fillColor = getColor(attValue);
     
+    //Create circel markers and assign attributes
     var layer = L.circleMarker(latlng,geojsonMarkerOptions);
     
+    //Extraxt year value from attribute
     var year = attribute.split("_")[1];
     
+    //Create popUpContent for circle Markers
     var popupContent ="<p><b>Stadium:</b> "+ feature.properties.Stadium + "</p>";
     popupContent += "<p><b>Team:</b> "+feature.properties.Team + "</p>";
+    //Create content for panel 	
     var panelContent = "<p><b>Population in " + year + ":</b> "+feature.properties[attribute] + "</p>";
+    //add popup content to points	
     layer.bindPopup(popupContent);
-    
+    //Make pop up content viewble once point is hovered over.
     layer.on({
         mouseover: function(){
             this.openPopup();
@@ -157,6 +158,7 @@ function pointToLayer(feature, latlng, attributes){
         mouseout: function(){
             this.closePopup();
         },
+	//add panelContent once point is clicked
         click: function(){
             $("#popupPanel").html(panelContent);
         }
@@ -165,15 +167,19 @@ function pointToLayer(feature, latlng, attributes){
     return layer;
 };
 
+//Create Geojson Layer and marker cluster
 function createColorSymbols(data, map,attributes){
-    var markers = new L.MarkerClusterGroup();
+     //Intialize marker cluster object
+     var markers = new L.MarkerClusterGroup();
+     //Create geoJson layer and pointToLayer options
      var geoJson = L.geoJson(data, {
                 pointToLayer: function(feature, latlng){
 					return pointToLayer(feature,latlng,attributes);
 				}
             });
-			markers.addLayer(geoJson);
-			map.addLayer(markers);
+       //Add geojsonLayer to markerclustergroup
+       markers.addLayer(geoJson);
+       map.addLayer(markers);
 };
 //function to retrieve the data and place it on the map
 function getData(map){
@@ -184,7 +190,7 @@ function getData(map){
             var attributes = processData(response);
             console.log(String(attributes[0]));
             //create basic marker options
-			createSquenceControls(map, attributes);
+	    createSquenceControls(map, attributes);
             createColorSymbols(response, map, attributes);
 			console.log(map);
             
