@@ -4,8 +4,28 @@ function createMap(){
     //add OSM base tilelayer
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-    }).addTo(map);
+    }).addTo(map)
+	// Create legend
+	 var legend = L.control({position: 'bottomright'});
+	
+	legend.onAdd = function (map) {
 
+		var div = L.DomUtil.create('div', 'info legend'),
+		    grades = [0, 1000000, 1500000, 2000000, 2500000, 3000000, 3250000],
+		    labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+
+legend.addTo(map);
+	
     //call ajax function
     getData(map);
 };
