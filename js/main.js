@@ -75,6 +75,7 @@ function createSquenceControls(map, attributes){
     //Create Slider
     var yearRanges = [2011,2012,2013,2014,2015,2016,2017,2018];
     var yearValue = document.getElementById("year");
+	
     yearValue.innerHTML = yearRanges[0];
     $("#panel").append('<input class="range-slider" type="range">');
     $('.range-slider').attr({
@@ -103,7 +104,8 @@ function createSquenceControls(map, attributes){
         };
 	 //Use value from buttons to run updatePropSymbols.
         $('.range-slider').val(index);
-		updatePropSymbols(map, attributes[index]);
+	yearValue.innerHTML = yearRanges[index];
+	updatePropSymbols(map, attributes[index]);
     });
     //Use value selected from slider to run updatePropSymbosl
     $('.range-slider').on('input',function(){
