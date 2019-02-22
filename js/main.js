@@ -172,7 +172,7 @@ function pointToLayer(feature, latlng, attributes){
     var popupContent ="<p><b>Stadium:</b> "+ feature.properties.Stadium + "</p>";
     popupContent += "<p><b>Team:</b> "+feature.properties.Team + "</p>";
     //Create content for panel 	
-    var panelContent = "<p><b>Population in " + year + ":</b> "+feature.properties[attribute] + "</p>";
+    var panelContent = "<p><b>Attendance in " + year + ":</b> "+feature.properties[attribute] + "</p>";
     //add popup content to points	
     layer.bindPopup(popupContent);
     //Make pop up content viewble once point is hovered over.
