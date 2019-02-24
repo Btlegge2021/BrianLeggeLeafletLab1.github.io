@@ -1,3 +1,5 @@
+var yearRanges = [2011,2012,2013,2014,2015,2016,2017,2018];
+var yearValue = document.getElementById("year");
 function createMap(){
     //create the map
     var map = new L.map('mapid').setView([37.8, -96], 4);
@@ -33,11 +35,13 @@ legend.addTo(map);
 //update points when slider is pressed
 function updatePropSymbols(map,attribute){
     //Update points 
+	var findLayers = new L.layerGroup();
     map.eachLayer(function(layer){
+		findLayers.addLayer(layer);
         if(layer.feature && layer.feature.properties[attribute]){
             var props = layer.feature.properties;
             var color = getColor(props[attribute]);
-	    var options = {
+			var options = {
                 radius: 8,
                 color: "#000",
                 weight: 1,
@@ -48,9 +52,9 @@ function updatePropSymbols(map,attribute){
             layer.setStyle(options);
 	    //Refresh pop ups
             var year = attribute.split("_")[1];
-            var popupContent = "<p><b>Stadium:</b> " +props.Stadium + "</p>";
-            popupContent += "<p><b>Team:</b> " +props.Team + "</p>";
-			var panelContent = "<p><b>Attendance in " + year + ":</b> "+ props[attribute] + "</p>";
+            var panelContent = "<p><b>Stadium:</b> " +props.Stadium + "</p>";
+			panelContent +="<p><b>Attendance in " + year + ":</b> "+ props[attribute] + "</p>";
+            var popupContent = "<p><b>Team:</b> " +props.Team + "</p>";
             layer.bindPopup(popupContent,{
                 offest: new L.point(0,-color)
             });
@@ -66,28 +70,38 @@ function updatePropSymbols(map,attribute){
 				$("#popupPanel").html(panelContent);
 				}
 			});
-			
+			layer.redraw();
+			layer.addTo(map);
         };
     });
 };
 //Create slider and buttons
 function createSquenceControls(map, attributes){
     //Create Slider
-    var yearRanges = [2011,2012,2013,2014,2015,2016,2017,2018];
-    var yearValue = document.getElementById("year");
+	var divisions = ["All","AL Central", "AL East", "AL West", 'NL Central', 'NL East', 'NL West'];
+    //var yearRanges = [2011,2012,2013,2014,2015,2016,2017,2018];
+    //var yearValue = document.getElementById("year");
 	
     yearValue.innerHTML = yearRanges[0];
-    $("#panel").append('<input class="range-slider" type="range">');
+    $("#panel").append('<input class="range-slider" type="range"> <br><br> <div id= "popUpCont" class="container-fluid"><b><h2>Stadium Info</h2></b><p id= "popupPanel"><b>Click Stadium to get Name and Attendance</b></p></div>');
     $('.range-slider').attr({
         max: 7,
         min: 0,
         value: 0,
         step: 1
     });
+	$("#panel").append('<br><br><div id = "filterPanel" class = "btn-group"><h2>Divisions Filter</h2></div>');
+	for (var i = 0; i < divisions.length; i++){
+		divis = divisions[i];
+		console.log(divisions[i]);
+		$("#filterPanel").append('<div id= "' + divis + '"><button id= "' + String(divis) + '" class= "skip">' + divis + '</button></div>' );
+	};
+
     //Create forward and reverse buttons
-    $('#reverse').append('<button class="skip" id="reverse">Reverse</button>');
-    $('#forward').append('<button class="skip" id="forward">Forward</button>');
+    $('#reverse').append('<button class="skip" id="reverse">-</button>');
+    $('#forward').append('<button class="skip" id="forward">+</button>');
     
+	
     //Get value from slider
     $('.skip').click(function(){
         var index = $('.range-slider').val();
@@ -102,14 +116,15 @@ function createSquenceControls(map, attributes){
 	    //If value goes below 0 then it goes to 7
             index = index < 0 ? 7: index;
         };
-	 //Use value from buttons to run updatePropSymbols.
-        $('.range-slider').val(index);
+	//Use value from buttons to run updatePropSymbols.
+    $('.range-slider').val(index);
 	yearValue.innerHTML = yearRanges[index];
 	updatePropSymbols(map, attributes[index]);
     });
     //Use value selected from slider to run updatePropSymbosl
     $('.range-slider').on('input',function(){
         var index = $(this).val();
+		yearValue.innerHTML = yearRanges[index];
         updatePropSymbols(map, attributes[index]);
     });
    
@@ -131,6 +146,7 @@ function processData(data){
     return attributes;
 }
 
+
 //Create ranges of colors based on Attendance value
 function getColor(d) {
     return d > 3250000 ? '#800026' :
@@ -147,6 +163,7 @@ function getColor(d) {
 
 //Create points to layer attributes and functions for geoJson Layer
 function pointToLayer(feature, latlng, attributes){
+	
 	
     //Attributes intialized at 0 postions in array.
     var attribute = attributes[0];
@@ -172,12 +189,10 @@ function pointToLayer(feature, latlng, attributes){
     //Extraxt year value from attribute
     var year = attribute.split("_")[1];
     
-    //Create popUpContent for circle Markers
-    var popupContent ="<p><b>Stadium:</b> "+ feature.properties.Stadium + "</p>";
-    popupContent += "<p><b>Team:</b> "+feature.properties.Team + "</p>";
-    //Create content for panel 	
-    var panelContent = "<p><b>Attendance in " + year + ":</b> "+feature.properties[attribute] + "</p>";
-	
+    //Create panelContent for popupPanel
+    var panelContent ="<p><b>Stadium:</b> "+ feature.properties.Stadium + "</p>";
+	panelContent += "<p><b>Attendance in " + year + ":</b> "+feature.properties[attribute] + "</p>";
+    var popupContent = "<p><b>Team:</b> "+feature.properties.Team + "</p>";
     //add popup content to points	
     layer.bindPopup(popupContent);
     //Make pop up content viewble once point is hovered over.
@@ -200,30 +215,131 @@ function pointToLayer(feature, latlng, attributes){
 //Create Geojson Layer and marker cluster
 function createColorSymbols(data, map,attributes){
      //Intialize marker cluster object
-    var markers = new L.MarkerClusterGroup();
+    //var markers = new L.MarkerClusterGroup();
      //Create geoJson layer and pointToLayer options
-    var geoJson = L.geoJson(data, {
+    /*var geoJson = L.geoJson(data, {
                 pointToLayer: function(feature, latlng){
 					return pointToLayer(feature,latlng,attributes);
 				}
-           });
+           });*/
+	var alc = L.geoJson(data, {
+		pointToLayer: function(feature, latlng){
+			return pointToLayer(feature,latlng,attributes);
+		},
+		filter: function(feature, layer){
+					return feature.properties.Division == 'AL Central';
+					}
+				});
+	
+	var ale = L.geoJson(data, {
+		pointToLayer: function(feature, latlng){
+			return pointToLayer(feature,latlng,attributes);
+		},
+		filter: function(feature, layer){
+					return feature.properties.Division == 'AL East';
+					}
+				});
+	
+	var alw = L.geoJson(data, {
+		pointToLayer: function(feature, latlng){
+			return pointToLayer(feature,latlng,attributes);
+		},
+		filter: function(feature, layer){
+					return feature.properties.Division == 'AL West';
+					}
+				});
+				
+	var nlc = L.geoJson(data, {
+		pointToLayer: function(feature, latlng){
+			return pointToLayer(feature,latlng,attributes);
+		},
+		filter: function(feature, layer){
+					return feature.properties.Division == 'NL Central';
+					}
+				});			
+	
+	var nle = L.geoJson(data, {
+		pointToLayer: function(feature, latlng){
+			return pointToLayer(feature,latlng,attributes);
+		},
+		filter: function(feature, layer){
+					return feature.properties.Division == 'NL East';
+					}
+				});
+	
+	var nlw = L.geoJson(data, {
+		pointToLayer: function(feature, latlng){
+			return pointToLayer(feature,latlng,attributes);
+		},
+		filter: function(feature, layer){
+					return feature.properties.Division == 'NL West';
+					}
+				});
+	var teamGroup = L.layerGroup([alc, ale, alw, nlc, nle, nlw]);
+	
 	//Create Search Box
 	var searchTeams = new L.Control.Search({
 		position: 'topleft',
 		//propertyName chooses what property in the GeoJson is being searched
 		propertyName: "Team",
-		layer: geoJson,
+		layer: teamGroup,
 		intial: false,
 		zoom: 15,
 		marker: false
 	});
 	
+	$('.skip').click(function(){
+        if ($(this).attr('id') == 'AL Central'){
+           map.removeLayer(teamGroup);
+		   teamGroup = L.layerGroup([alc]);
+		   map.addLayer(teamGroup);
+		   $('.range-slider').val(0);
+			yearValue.innerHTML = yearRanges[0];
+        } else if ($(this).attr('id') == 'AL East'){
+			map.removeLayer(teamGroup);
+			teamGroup = L.layerGroup([ale]);
+			map.addLayer(teamGroup);
+			$('.range-slider').val(0);
+			yearValue.innerHTML = yearRanges[0];
+		} else if ($(this).attr('id') == 'AL West'){
+			map.removeLayer(teamGroup);
+			teamGroup = L.layerGroup([alw]);
+			map.addLayer(teamGroup);
+			$('.range-slider').val(0);
+			yearValue.innerHTML = yearRanges[0];
+		} else if ($(this).attr('id') == 'NL Central'){
+			map.removeLayer(teamGroup);
+			teamGroup = L.layerGroup([nlc]);
+			map.addLayer(teamGroup);
+			$('.range-slider').val(0);
+			yearValue.innerHTML = yearRanges[0];
+		} else if ($(this).attr('id') == 'NL East'){
+			map.removeLayer(teamGroup);
+			teamGroup = L.layerGroup([nle]);
+			map.addLayer(teamGroup);
+			$('.range-slider').val(0);
+			yearValue.innerHTML = yearRanges[0];
+		} else if ($(this).attr('id') == 'NL West'){
+			map.removeLayer(teamGroup);
+			teamGroup = L.layerGroup([nlw]);
+			map.addLayer(teamGroup);
+			$('.range-slider').val(0);
+			yearValue.innerHTML = yearRanges[0];
+		} else if ($(this).attr('id') == 'All'){
+			map.removeLayer(teamGroup);
+			teamGroup = L.layerGroup([alc, ale, alw, nlc, nle, nlw]);
+			map.addLayer(teamGroup);
+			$('.range-slider').val(0);
+			yearValue.innerHTML = yearRanges[0];
+		}
+        });
+
+	//markers.addLayer(teamGroup);
+    map.addLayer(teamGroup);
 	//Add Search box to map
-	map.addControl( searchTeams);
+	map.addControl(searchTeams);
     //Add geojsonLayer to markerclustergroup
-    markers.addLayer(geoJson);
-    map.addLayer(markers);
-};
+		};
 //function to retrieve the data and place it on the map
 function getData(map){
     //load the data
