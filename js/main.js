@@ -295,42 +295,49 @@ function createColorSymbols(data, map,attributes){
 		   map.addLayer(teamGroup);
 		   $('.range-slider').val(0);
 			yearValue.innerHTML = yearRanges[0];
+			updatePropSymbols(map, attributes[0]);
         } else if ($(this).attr('id') == 'AL East'){
 			map.removeLayer(teamGroup);
 			teamGroup = L.layerGroup([ale]);
 			map.addLayer(teamGroup);
 			$('.range-slider').val(0);
 			yearValue.innerHTML = yearRanges[0];
+			updatePropSymbols(map, attributes[0]);
 		} else if ($(this).attr('id') == 'AL West'){
 			map.removeLayer(teamGroup);
 			teamGroup = L.layerGroup([alw]);
 			map.addLayer(teamGroup);
 			$('.range-slider').val(0);
 			yearValue.innerHTML = yearRanges[0];
+			updatePropSymbols(map, attributes[0]);
 		} else if ($(this).attr('id') == 'NL Central'){
 			map.removeLayer(teamGroup);
 			teamGroup = L.layerGroup([nlc]);
 			map.addLayer(teamGroup);
 			$('.range-slider').val(0);
 			yearValue.innerHTML = yearRanges[0];
+			updatePropSymbols(map, attributes[0]);
 		} else if ($(this).attr('id') == 'NL East'){
 			map.removeLayer(teamGroup);
 			teamGroup = L.layerGroup([nle]);
 			map.addLayer(teamGroup);
 			$('.range-slider').val(0);
 			yearValue.innerHTML = yearRanges[0];
+			updatePropSymbols(map, attributes[0]);
 		} else if ($(this).attr('id') == 'NL West'){
 			map.removeLayer(teamGroup);
 			teamGroup = L.layerGroup([nlw]);
 			map.addLayer(teamGroup);
 			$('.range-slider').val(0);
 			yearValue.innerHTML = yearRanges[0];
+			updatePropSymbols(map, attributes[0]);
 		} else if ($(this).attr('id') == 'All'){
 			map.removeLayer(teamGroup);
 			teamGroup = L.layerGroup([alc, ale, alw, nlc, nle, nlw]);
 			map.addLayer(teamGroup);
 			$('.range-slider').val(0);
 			yearValue.innerHTML = yearRanges[0];
+			updatePropSymbols(map, attributes[0]);
 		}
         });
 
