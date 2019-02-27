@@ -1,6 +1,7 @@
 //I made these variables accessable outside of a function so other functions could edit them.
 var yearRanges = [2011,2012,2013,2014,2015,2016,2017,2018];
 var yearValue = document.getElementById("year");
+yearValue.innerHTML = yearRanges[0];
 function createMap(){
     //create the map
     var map = new L.map('mapid').setView([37.8, -96], 4);
