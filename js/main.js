@@ -1,3 +1,4 @@
+//I made these variables accessable outside of a function so other functions could edit them.
 var yearRanges = [2011,2012,2013,2014,2015,2016,2017,2018];
 var yearValue = document.getElementById("year");
 function createMap(){
@@ -9,12 +10,10 @@ function createMap(){
     }).addTo(map)
 	// Create legend
 	 var legend = L.control({position: 'bottomright'});
-	
-	legend.onAdd = function (map) {
-
-		var div = L.DomUtil.create('div', 'info legend'),
-		    grades = [0, 1000000, 1500000, 2000000, 2500000, 3000000, 3250000],
-		    labels = [];
+	 legend.onAdd = function (map) {
+		 var div = L.DomUtil.create('div', 'info legend'),
+		 grades = [0, 1000000, 1500000, 2000000, 2500000, 3000000, 3250000],
+		 labels = [];
 
     // loop through our density intervals and generate a label with a colored square for each interval
     for (var i = 0; i < grades.length; i++) {
@@ -25,7 +24,7 @@ function createMap(){
 
     return div;
 };
-
+//Add legend to map
 legend.addTo(map);
 	
     //call ajax function
@@ -77,12 +76,9 @@ function updatePropSymbols(map,attribute){
 };
 //Create slider and buttons
 function createSquenceControls(map, attributes){
-    //Create Slider
-	var divisions = ["All","AL Central", "AL East", "AL West", 'NL Central', 'NL East', 'NL West'];
-    //var yearRanges = [2011,2012,2013,2014,2015,2016,2017,2018];
-    //var yearValue = document.getElementById("year");
-	
-    yearValue.innerHTML = yearRanges[0];
+   //Create an array to store button names
+    var divisions = ["All","AL Central", "AL East", "AL West", 'NL Central', 'NL East', 'NL West'];
+     //Create Slider
     $("#panel").append('<input class="range-slider" type="range"> <br><br> <div id= "popUpCont" class="container-fluid"><b><h2>Stadium Info</h2></b><p id= "popupPanel"><b>Click Stadium to get Name and Attendance</b></p></div>');
     $('.range-slider').attr({
         max: 7,
@@ -90,6 +86,7 @@ function createSquenceControls(map, attributes){
         value: 0,
         step: 1
     });
+	//Create filter panel and create buttons.
 	$("#panel").append('<br><br><div id = "filterPanel" class = "btn-group"><h2>Divisions Filter</h2></div>');
 	for (var i = 0; i < divisions.length; i++){
 		divis = divisions[i];
@@ -124,7 +121,7 @@ function createSquenceControls(map, attributes){
     //Use value selected from slider to run updatePropSymbosl
     $('.range-slider').on('input',function(){
         var index = $(this).val();
-		yearValue.innerHTML = yearRanges[index];
+	yearValue.innerHTML = yearRanges[index];
         updatePropSymbols(map, attributes[index]);
     });
    
@@ -189,7 +186,7 @@ function pointToLayer(feature, latlng, attributes){
     //Extraxt year value from attribute
     var year = attribute.split("_")[1];
     
-    //Create panelContent for popupPanel
+    //Create panelContent and popupContent for points and side panel
     var panelContent ="<p><b>Stadium:</b> "+ feature.properties.Stadium + "</p>";
 	panelContent += "<p><b>Attendance in " + year + ":</b> "+feature.properties[attribute] + "</p>";
     var popupContent = "<p><b>Team:</b> "+feature.properties.Team + "</p>";
@@ -214,14 +211,7 @@ function pointToLayer(feature, latlng, attributes){
 
 //Create Geojson Layer and marker cluster
 function createColorSymbols(data, map,attributes){
-     //Intialize marker cluster object
-    //var markers = new L.MarkerClusterGroup();
-     //Create geoJson layer and pointToLayer options
-    /*var geoJson = L.geoJson(data, {
-                pointToLayer: function(feature, latlng){
-					return pointToLayer(feature,latlng,attributes);
-				}
-           });*/
+     //Create geoJson layers for based on division attribute and pointToLayer options
 	var alc = L.geoJson(data, {
 		pointToLayer: function(feature, latlng){
 			return pointToLayer(feature,latlng,attributes);
@@ -275,6 +265,7 @@ function createColorSymbols(data, map,attributes){
 					return feature.properties.Division == 'NL West';
 					}
 				});
+	//Group all GeoJson Layers into a Group Layer
 	var teamGroup = L.layerGroup([alc, ale, alw, nlc, nle, nlw]);
 	
 	//Create Search Box
@@ -288,6 +279,7 @@ function createColorSymbols(data, map,attributes){
 		marker: false
 	});
 	
+	//Create click functions to work with with the filter panel
 	$('.skip').click(function(){
         if ($(this).attr('id') == 'AL Central'){
            map.removeLayer(teamGroup);
@@ -342,10 +334,9 @@ function createColorSymbols(data, map,attributes){
         });
 
 	//markers.addLayer(teamGroup);
-    map.addLayer(teamGroup);
+        map.addLayer(teamGroup);
 	//Add Search box to map
 	map.addControl(searchTeams);
-    //Add geojsonLayer to markerclustergroup
 		};
 //function to retrieve the data and place it on the map
 function getData(map){
